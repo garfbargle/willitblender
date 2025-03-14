@@ -360,11 +360,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeCategoryPills() {
         // Add "All" pill
         const allPill = document.createElement('button');
-        allPill.className = 'category-pill active';
+        allPill.className = 'category-pill exclusive';
         allPill.dataset.value = 'all';
         allPill.textContent = 'All Categories';
         categoriesContainer.appendChild(allPill);
-        categoryStates['all'] = 'active';
+        categoryStates['all'] = 'exclusive';
+        exclusiveCategory = 'all';
 
         // Define category order by importance/frequency of use
         const categoryOrder = [
@@ -403,11 +404,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (categoryMap[categoryName]) {
                 const categoryValue = categoryName.toLowerCase().replace(/\s+/g, '-');
                 const pill = document.createElement('button');
-                pill.className = 'category-pill active';
+                pill.className = 'category-pill disabled';
                 pill.dataset.value = categoryValue;
                 pill.textContent = categoryName;
                 categoriesContainer.appendChild(pill);
-                categoryStates[categoryValue] = 'active';
+                categoryStates[categoryValue] = 'disabled';
             }
         });
 
@@ -416,11 +417,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!categoryOrder.includes(cat.category)) {
                 const categoryValue = cat.category.toLowerCase().replace(/\s+/g, '-');
                 const pill = document.createElement('button');
-                pill.className = 'category-pill active';
+                pill.className = 'category-pill disabled';
                 pill.dataset.value = categoryValue;
                 pill.textContent = cat.category;
                 categoriesContainer.appendChild(pill);
-                categoryStates[categoryValue] = 'active';
+                categoryStates[categoryValue] = 'disabled';
             }
         });
 
@@ -432,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Toggle category state: active -> disabled -> exclusive -> active
+    // Toggle category state: active -> exclusive -> disabled -> active
     function toggleCategoryState(categoryValue) {
         // If we have an exclusive category and it's not the one we're toggling,
         // reset all categories to active first
@@ -445,9 +446,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Determine the next state based on current state
         if (currentState === 'active') {
-            newState = 'disabled';
-            exclusiveCategory = null; // Clear exclusive category if we're just disabling
-        } else if (currentState === 'disabled') {
             newState = 'exclusive';
             
             // If setting exclusive, disable all other categories
@@ -458,17 +456,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     updatePillUI(cat);
                 }
             });
-        } else { // exclusive -> active
+        } else if (currentState === 'exclusive') {
+            newState = 'disabled';
+            exclusiveCategory = null; // Clear exclusive category if we're disabling
+        } else { // disabled -> active
             newState = 'active';
             exclusiveCategory = null;
             
-            // When leaving exclusive mode, reset all other categories to active
-            Object.keys(categoryStates).forEach(cat => {
-                if (cat !== categoryValue) {
-                    categoryStates[cat] = 'active';
-                    updatePillUI(cat);
-                }
-            });
+            // When leaving disabled mode, don't automatically reset other categories
         }
 
         // Update the state and UI
@@ -588,9 +583,9 @@ document.addEventListener('DOMContentLoaded', () => {
                   .replace(/then/g, ' <span class="then">then</span> ')
                   .replace(/\(/g, '<span class="paren">(</span>')
                   .replace(/\)/g, '<span class="paren">)</span>')
-                  .replace(/MMB/g, '<span class="mouse">MMB</span>')
-                  .replace(/LMB/g, '<span class="mouse">LMB</span>')
-                  .replace(/RMB/g, '<span class="mouse">RMB</span>')
+                  .replace(/MMB/g, '<span class="mouse" title="Middle Mouse Button">Middle 🖱️</span>')
+                  .replace(/LMB/g, '<span class="mouse" title="Left Mouse Button">Left 🖱️</span>')
+                  .replace(/RMB/g, '<span class="mouse" title="Right Mouse Button">Right 🖱️</span>')
                   .replace(/Ctrl/g, '<span class="modifier">Ctrl</span>')
                   .replace(/Alt/g, '<span class="modifier">Alt</span>')
                   .replace(/Shift/g, '<span class="modifier">Shift</span>')

@@ -388,6 +388,12 @@ main {
     margin: 0 0.1rem;
 }
 
+.mouse {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
 .light .modifier, .light .mouse {
     background-color: var(--light-key-bg);
     border: 1px solid var(--light-key-border);
@@ -591,8 +597,12 @@ kbd {
 .category-pill.exclusive {
     background-color: var(--dark-accent-light);
     color: white;
+    font-weight: 600;
+    box-shadow: 0 0 0 2px var(--dark-accent);
+    transform: scale(1.05);
 }
 
 .light .category-pill.exclusive {
     background-color: var(--light-accent-light);
+    box-shadow: 0 0 0 2px var(--light-accent);
 } 
