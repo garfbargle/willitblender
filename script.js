@@ -341,51 +341,147 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const shortcutsContainer = document.getElementById('shortcuts');
-    const categoryFilter = document.getElementById('category-filter');
     const searchInput = document.getElementById('search');
     const themeToggle = document.getElementById('theme-toggle');
     const keysDisplay = document.getElementById('keys-display');
+    const categoriesContainer = document.getElementById('categories-container');
     let activeKey = null;
     let currentTheme = localStorage.getItem('theme') || 'dark';
+    
+    // Category filter states: active, disabled, exclusive
+    let categoryStates = {};
+    let exclusiveCategory = null;
 
     // Initialize the theme
     document.body.className = currentTheme;
     updateThemeIcon();
 
-    // Initialize category filter
-    function initializeCategoryFilter() {
-        // Add "All" option
-        const allOption = document.createElement('option');
-        allOption.value = 'all';
-        allOption.textContent = 'All Categories';
-        categoryFilter.appendChild(allOption);
+    // Initialize category pills
+    function initializeCategoryPills() {
+        // Add "All" pill
+        const allPill = document.createElement('button');
+        allPill.className = 'category-pill active';
+        allPill.dataset.value = 'all';
+        allPill.textContent = 'All Categories';
+        categoriesContainer.appendChild(allPill);
+        categoryStates['all'] = 'active';
 
         // Add each category
         shortcutsData.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat.category.toLowerCase().replace(/\s+/g, '-');
-            option.textContent = cat.category;
-            categoryFilter.appendChild(option);
+            const categoryValue = cat.category.toLowerCase().replace(/\s+/g, '-');
+            const pill = document.createElement('button');
+            pill.className = 'category-pill active';
+            pill.dataset.value = categoryValue;
+            pill.textContent = cat.category;
+            categoriesContainer.appendChild(pill);
+            categoryStates[categoryValue] = 'active';
         });
 
-        // Event listener for category filter
-        categoryFilter.addEventListener('change', filterShortcuts);
+        // Event listener for category pills
+        categoriesContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('category-pill')) {
+                toggleCategoryState(e.target.dataset.value);
+            }
+        });
+    }
+
+    // Toggle category state: active -> disabled -> exclusive -> active
+    function toggleCategoryState(categoryValue) {
+        // If we have an exclusive category and it's not the one we're toggling,
+        // reset all categories to active first
+        if (exclusiveCategory && exclusiveCategory !== categoryValue) {
+            resetCategoryStates();
+        }
+
+        const currentState = categoryStates[categoryValue];
+        let newState;
+
+        // Determine the next state based on current state
+        if (currentState === 'active') {
+            newState = 'disabled';
+            exclusiveCategory = null; // Clear exclusive category if we're just disabling
+        } else if (currentState === 'disabled') {
+            newState = 'exclusive';
+            
+            // If setting exclusive, disable all other categories
+            exclusiveCategory = categoryValue;
+            Object.keys(categoryStates).forEach(cat => {
+                if (cat !== categoryValue) {
+                    categoryStates[cat] = 'disabled';
+                    updatePillUI(cat);
+                }
+            });
+        } else { // exclusive -> active
+            newState = 'active';
+            exclusiveCategory = null;
+            
+            // When leaving exclusive mode, reset all other categories to active
+            Object.keys(categoryStates).forEach(cat => {
+                if (cat !== categoryValue) {
+                    categoryStates[cat] = 'active';
+                    updatePillUI(cat);
+                }
+            });
+        }
+
+        // Update the state and UI
+        categoryStates[categoryValue] = newState;
+        updatePillUI(categoryValue);
+        filterShortcuts();
+    }
+
+    // Reset all category states to active
+    function resetCategoryStates() {
+        exclusiveCategory = null;
+        Object.keys(categoryStates).forEach(cat => {
+            categoryStates[cat] = 'active';
+            updatePillUI(cat);
+        });
+    }
+
+    // Update the visual appearance of a pill based on its state
+    function updatePillUI(categoryValue) {
+        const pill = document.querySelector(`.category-pill[data-value="${categoryValue}"]`);
+        if (!pill) return;
+
+        // Remove all state classes first
+        pill.classList.remove('active', 'disabled', 'exclusive');
+        
+        // Add the appropriate class based on the current state
+        if (categoryStates[categoryValue]) {
+            pill.classList.add(categoryStates[categoryValue]);
+        }
     }
 
     // Function to render shortcuts based on current filters
     function renderShortcuts() {
         const query = searchInput.value.toLowerCase();
-        const categoryValue = categoryFilter.value;
         
         shortcutsContainer.innerHTML = '';
         
         let filteredData = shortcutsData;
         
-        // Filter by category if not "all"
-        if (categoryValue !== 'all') {
+        // Apply category filtering based on states
+        if (exclusiveCategory && exclusiveCategory !== 'all') {
+            // If we have an exclusive category (not 'all'), only show that category
             filteredData = shortcutsData.filter(cat => 
-                cat.category.toLowerCase().replace(/\s+/g, '-') === categoryValue
+                cat.category.toLowerCase().replace(/\s+/g, '-') === exclusiveCategory
             );
+        } else if (categoryStates['all'] === 'active') {
+            // If 'all' is active, show all categories except those explicitly disabled
+            filteredData = shortcutsData.filter(cat => {
+                const catValue = cat.category.toLowerCase().replace(/\s+/g, '-');
+                return categoryStates[catValue] !== 'disabled';
+            });
+        } else if (categoryStates['all'] === 'disabled') {
+            // If 'all' is disabled, only show active categories
+            filteredData = shortcutsData.filter(cat => {
+                const catValue = cat.category.toLowerCase().replace(/\s+/g, '-');
+                return categoryStates[catValue] === 'active' || categoryStates[catValue] === 'exclusive';
+            });
+        } else if (categoryStates['all'] === 'exclusive') {
+            // If 'all' is exclusive, show all categories
+            filteredData = shortcutsData;
         }
         
         // Then filter by search term
@@ -474,7 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
         activeKey = null;
     });
 
-    // Filter shortcuts based on search and category
+    // Function to filter shortcuts based on search and category states
     function filterShortcuts() {
         renderShortcuts();
     }
@@ -499,7 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
     themeToggle.addEventListener('click', toggleTheme);
 
     // Initialize the page
-    initializeCategoryFilter();
+    initializeCategoryPills();
     renderShortcuts();
     
     // Add a keyboard shortcut for search (Ctrl+F or Cmd+F)
