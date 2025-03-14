@@ -272,6 +272,7 @@ main {
 
 .action {
     font-weight: 500;
+    font-size: 1.1rem;
 }
 
 .keys {
@@ -340,7 +341,7 @@ main {
 
 .key-combo {
     font-family: 'SF Mono', 'Consolas', 'Liberation Mono', Menlo, monospace;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     line-height: 1.8;
 }
 
