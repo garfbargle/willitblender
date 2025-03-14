@@ -366,15 +366,62 @@ document.addEventListener('DOMContentLoaded', () => {
         categoriesContainer.appendChild(allPill);
         categoryStates['all'] = 'active';
 
-        // Add each category
+        // Define category order by importance/frequency of use
+        const categoryOrder = [
+            "General",
+            "Navigation",
+            "View",
+            "Selection",
+            "Object Mode",
+            "Modeling",
+            "Shading",
+            "Pie Menus",
+            "Curve Editing",
+            "Texturing",
+            "UV Editor",
+            "Animation",
+            "Rigging",
+            "Posing Mode",
+            "Sculpting",
+            "Rendering",
+            "Nodes",
+            "Compositor",
+            "Graph Editor",
+            "Image Editor (View)",
+            "Image Editor (Paint)",
+            "Window General"
+        ];
+
+        // Create a map of categories for quicker lookup
+        const categoryMap = {};
         shortcutsData.forEach(cat => {
-            const categoryValue = cat.category.toLowerCase().replace(/\s+/g, '-');
-            const pill = document.createElement('button');
-            pill.className = 'category-pill active';
-            pill.dataset.value = categoryValue;
-            pill.textContent = cat.category;
-            categoriesContainer.appendChild(pill);
-            categoryStates[categoryValue] = 'active';
+            categoryMap[cat.category] = cat;
+        });
+
+        // Add categories in the defined order
+        categoryOrder.forEach(categoryName => {
+            if (categoryMap[categoryName]) {
+                const categoryValue = categoryName.toLowerCase().replace(/\s+/g, '-');
+                const pill = document.createElement('button');
+                pill.className = 'category-pill active';
+                pill.dataset.value = categoryValue;
+                pill.textContent = categoryName;
+                categoriesContainer.appendChild(pill);
+                categoryStates[categoryValue] = 'active';
+            }
+        });
+
+        // Add any remaining categories that weren't in the predefined order
+        shortcutsData.forEach(cat => {
+            if (!categoryOrder.includes(cat.category)) {
+                const categoryValue = cat.category.toLowerCase().replace(/\s+/g, '-');
+                const pill = document.createElement('button');
+                pill.className = 'category-pill active';
+                pill.dataset.value = categoryValue;
+                pill.textContent = cat.category;
+                categoriesContainer.appendChild(pill);
+                categoryStates[categoryValue] = 'active';
+            }
         });
 
         // Event listener for category pills
