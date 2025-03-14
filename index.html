@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WillItBlender - Keyboard Shortcuts</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="favicon.png">
+</head>
+<body class="dark">
+    <header>
+        <div class="logo-container">
+            <img src="blender-logo.svg" alt="Blender Logo" class="logo">
+            <h1>WillItBlender</h1>
+        </div>
+        <div class="controls">
+            <div class="search-container">
+                <span class="material-icons search-icon">search</span>
+                <input type="text" id="search" placeholder="Search shortcuts...">
+            </div>
+            <select id="category-filter">
+                <!-- Categories will be loaded here -->
+            </select>
+            <button id="theme-toggle" aria-label="Toggle theme">
+                <span class="material-icons">light_mode</span>
+            </button>
+        </div>
+    </header>
+    
+    <main id="shortcuts">
+        <!-- Categories and shortcuts will be dynamically loaded here -->
+    </main>
+    
+    <div id="keys-display" class="keys-modal">
+        <div class="modal-content">
+            <div id="key-detail">
+                <!-- Key details will be displayed here -->
+            </div>
+            <button id="close-keys" class="close-button">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+    </div>
+    
+    <footer>
+        <p>A handy reference for Blender keyboard shortcuts. Powered by <a href="https://www.blender.org/" target="_blank">Blender</a>.</p>
+        <p class="help-text">Pro tip: Press <kbd>Ctrl</kbd>+<kbd>F</kbd> to search. Click on any shortcut to see it in detail.</p>
+    </footer>
+    
+    <script src="script.js"></script>
+</body>
+</html> 
