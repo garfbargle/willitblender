@@ -24,6 +24,21 @@
     --dark-key-bg: #2c3c52;
     --dark-key-border: #3b4f6c;
     --dark-key-text: #e2e8f0;
+    
+    /* New 3D key variables */
+    --light-key-top: #ffffff;
+    --light-key-side: #e2e8f0;
+    --light-key-shadow: rgba(0, 0, 0, 0.1);
+    --dark-key-top: #2c3c52;
+    --dark-key-side: #1c2738;
+    --dark-key-shadow: rgba(0, 0, 0, 0.3);
+    
+    /* Key highlight colors */
+    --key-orange: #ff7a2e;
+    --key-blue: #3b82f6;
+    --key-green: #10b981;
+    --key-purple: #8b5cf6;
+    --key-red: #ef4444;
 }
 
 /* Base styles */
@@ -226,19 +241,22 @@ main {
 
 .shortcuts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 1rem;
 }
 
 .shortcut {
     padding: 1rem;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     animation: fadeIn 0.3s ease-out;
+    position: relative;
+    overflow: hidden;
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(0,0,0,0.05));
 }
 
 @keyframes fadeIn {
@@ -246,134 +264,308 @@ main {
     to { opacity: 1; transform: translateY(0); }
 }
 
+.shortcut:hover {
+    transform: translateY(-5px) scale(1.02);
+}
+
 .light .shortcut {
     background-color: var(--light-card);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 
+        0 5px 15px rgba(0, 0, 0, 0.05),
+        0 15px 35px rgba(0, 0, 0, 0.03);
 }
 
 .dark .shortcut {
     background-color: var(--dark-card);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-.shortcut:hover {
-    transform: translateY(-2px);
+    box-shadow: 
+        0 5px 15px rgba(0, 0, 0, 0.2),
+        0 15px 35px rgba(0, 0, 0, 0.15);
 }
 
 .light .shortcut:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    background-color: var(--light-hover);
+    box-shadow: 
+        0 8px 25px rgba(0, 0, 0, 0.1),
+        0 20px 45px rgba(0, 0, 0, 0.06);
 }
 
 .dark .shortcut:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    background-color: var(--dark-hover);
+    box-shadow: 
+        0 8px 25px rgba(0, 0, 0, 0.3),
+        0 20px 45px rgba(0, 0, 0, 0.2);
 }
 
 .action {
-    font-weight: 500;
-    font-size: 1.1rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    color: var(--light-accent);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.action::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 25%;
+    right: 25%;
+    height: 2px;
+    background-color: var(--light-accent);
+    opacity: 0.3;
+    border-radius: 1px;
+}
+
+.dark .action {
+    color: var(--dark-accent);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.dark .action::after {
+    background-color: var(--dark-accent);
 }
 
 .keys {
-    font-family: 'SF Mono', 'Consolas', 'Liberation Mono', Menlo, monospace;
-    font-size: 0.9rem;
-    line-height: 1.8;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+    align-items: center;
+    min-height: 2.8rem;
+    padding: 0.3rem;
+    border-radius: 0.5rem;
 }
 
 .light .keys {
-    color: var(--light-text-secondary);
+    background-color: rgba(0, 0, 0, 0.02);
 }
 
 .dark .keys {
-    color: var(--dark-text-secondary);
+    background-color: rgba(255, 255, 255, 0.02);
 }
 
-/* Modal for key display */
+/* 3D Keyboard Key Styling */
+.key {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.25rem 0.5rem;
+    font-family: 'SF Mono', 'Consolas', 'Liberation Mono', Menlo, monospace;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 0.4rem;
+    transform-style: preserve-3d;
+    transform: perspective(500px) rotateX(10deg);
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(0,0,0,0.05));
+}
+
+.shortcut:hover .key {
+    transform: perspective(500px) rotateX(15deg) translateY(-2px);
+}
+
+.light .key {
+    background-color: var(--light-key-top);
+    color: var(--light-key-text);
+    box-shadow: 
+        0 1px 1px var(--light-key-shadow),
+        0 4px 0 var(--light-key-side),
+        0 4px 4px var(--light-key-shadow);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.dark .key {
+    background-color: var(--dark-key-top);
+    color: var(--dark-key-text);
+    box-shadow: 
+        0 1px 1px var(--dark-key-shadow),
+        0 4px 0 var(--dark-key-side),
+        0 4px 4px var(--dark-key-shadow);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.key:active, .shortcut:active .key {
+    transform: perspective(500px) rotateX(10deg) translateY(2px);
+}
+
+.light .key:active, .light .shortcut:active .key {
+    box-shadow: 
+        0 1px 1px var(--light-key-shadow),
+        0 2px 0 var(--light-key-side),
+        0 2px 2px var(--light-key-shadow);
+}
+
+.dark .key:active, .dark .shortcut:active .key {
+    box-shadow: 
+        0 1px 1px var(--dark-key-shadow),
+        0 2px 0 var(--dark-key-side),
+        0 2px 2px var(--dark-key-shadow);
+}
+
+/* Key type styling */
+.key.modifier {
+    background-color: var(--key-blue);
+    color: white;
+}
+
+.dark .key.modifier {
+    background-color: var(--key-blue);
+    box-shadow: 
+        0 1px 1px var(--dark-key-shadow),
+        0 4px 0 rgba(37, 99, 235, 0.8),
+        0 4px 4px var(--dark-key-shadow);
+}
+
+.light .key.modifier {
+    box-shadow: 
+        0 1px 1px var(--light-key-shadow),
+        0 4px 0 rgba(37, 99, 235, 0.8),
+        0 4px 4px var(--light-key-shadow);
+}
+
+/* Special key styling for numpad, function keys, etc. */
+.key:not(.modifier):not(.mouse) {
+    background-color: var(--dark-accent);
+    color: white;
+}
+
+.light .key:not(.modifier):not(.mouse) {
+    box-shadow: 
+        0 1px 1px var(--light-key-shadow),
+        0 4px 0 rgba(217, 70, 0, 0.8),
+        0 4px 4px var(--light-key-shadow);
+}
+
+.dark .key:not(.modifier):not(.mouse) {
+    box-shadow: 
+        0 1px 1px var(--dark-key-shadow),
+        0 4px 0 rgba(217, 70, 0, 0.8),
+        0 4px 4px var(--dark-key-shadow);
+}
+
+/* Key operators */
+.operator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.3rem;
+    font-weight: 600;
+    opacity: 0.8;
+    font-size: 1rem;
+}
+
+/* Text operators like 'drag' and 'hold' */
+.text-operator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.1rem;
+    font-weight: 500;
+    opacity: 0.7;
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+/* Mouse keys */
+.key.mouse {
+    position: relative;
+    border-radius: 1.5rem;
+    font-size: 0.7rem;
+    height: 2.6rem;
+    min-width: 1.8rem;
+    overflow: hidden;
+    text-transform: none;
+    letter-spacing: 0;
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0.15), rgba(0,0,0,0.1));
+}
+
+.light .key.mouse {
+    background-color: #e0e5ec;
+}
+
+.dark .key.mouse {
+    background-color: #2d3748;
+}
+
+.key.mouse::before {
+    content: "🖱️";
+    display: block;
+    font-size: 1.2rem;
+    margin-bottom: 0.2rem;
+}
+
+.key.mouse.lmb::after,
+.key.mouse.mmb::after,
+.key.mouse.rmb::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1rem;
+    border-radius: 0.5rem;
+}
+
+.key.mouse.lmb::after {
+    top: 0.5rem;
+    background-color: transparent;
+}
+
+.key.mouse.mmb::after {
+    top: 1.2rem;
+    background-color: transparent;
+}
+
+.key.mouse.rmb::after {
+    top: 0.5rem;
+    right: 0;
+    left: 50%;
+    background-color: transparent;
+}
+
+/* Modal for key details */
 .keys-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.8);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 100;
     padding: 1rem;
+    backdrop-filter: blur(4px);
 }
 
-.modal-content {
-    border-radius: 0.5rem;
-    padding: 2rem;
-    max-width: 500px;
-    width: 100%;
-    position: relative;
-    animation: zoomIn 0.3s ease-out;
+/* Key sizes */
+.key.small {
+    min-width: 2rem;
+    height: 2rem;
+    font-size: 1.0rem;
 }
 
-@keyframes zoomIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+.key.medium {
+    min-width: 2.5rem;
+    height: 2.2rem;
+    font-size: 0.85rem;
 }
 
-.light .modal-content {
-    background-color: var(--light-card);
+.key.large {
+    min-width: 4rem;
+    height: 2.2rem;
+    font-size: 0.85rem;
 }
 
-.dark .modal-content {
-    background-color: var(--dark-card);
-}
-
-#key-detail {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    align-items: center;
-    text-align: center;
-}
-
-#key-detail h3 {
-    font-size: 1.5rem;
-    font-weight: 600;
-}
-
-.key-combo {
-    font-family: 'SF Mono', 'Consolas', 'Liberation Mono', Menlo, monospace;
-    font-size: 1.25rem;
-    line-height: 1.8;
-}
-
-.close-button {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
-}
-
-.light .close-button {
-    color: var(--light-text);
-}
-
-.dark .close-button {
-    color: var(--dark-text);
-}
-
-.close-button:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
-.dark .close-button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+.key.space {
+    min-width: 5rem;
+    height: 2.2rem;
 }
 
 /* Styling for key components */
@@ -606,4 +798,128 @@ kbd {
 .light .category-pill.exclusive {
     background-color: var(--light-accent-light);
     box-shadow: 0 0 0 2px var(--light-accent);
+}
+
+/* Numpad key styling */
+.key.numpad {
+    background-color: var(--key-purple);
+    color: white;
+}
+
+.light .key.numpad {
+    box-shadow: 
+        0 1px 1px var(--light-key-shadow),
+        0 4px 0 rgba(110, 65, 226, 0.8),
+        0 4px 4px var(--light-key-shadow);
+}
+
+.dark .key.numpad {
+    box-shadow: 
+        0 1px 1px var(--dark-key-shadow),
+        0 4px 0 rgba(110, 65, 226, 0.8),
+        0 4px 4px var(--dark-key-shadow);
+}
+
+/* Modal content styling */
+.modal-content {
+    border-radius: 1rem;
+    padding: 2.5rem;
+    max-width: 600px;
+    width: 100%;
+    position: relative;
+    animation: zoomIn 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.light .modal-content {
+    background-color: var(--light-card);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+}
+
+.dark .modal-content {
+    background-color: var(--dark-card);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+#key-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+}
+
+#key-detail h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--light-accent);
+    border-bottom: 3px solid;
+    padding-bottom: 0.5rem;
+}
+
+.dark #key-detail h3 {
+    color: var(--dark-accent);
+}
+
+.key-combo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.key-combo .key {
+    min-width: 3.5rem;
+    height: 3.5rem;
+    font-size: 1.2rem;
+}
+
+.key-combo .operator {
+    font-size: 1.5rem;
+}
+
+.key-instructions {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    max-width: 80%;
+    text-align: center;
+}
+
+.close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--dark-text);
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.close-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.light .close-button {
+    color: var(--light-text);
+}
+
+.light .close-button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
 } 

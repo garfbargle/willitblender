@@ -495,6 +495,147 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Function to format keys for better display
+    function formatKeys(keys) {
+        // Split the key combination into individual keys and operators
+        let keyParts = [];
+        
+        // Handle various formats and separators
+        const keyString = keys
+            .replace(/\+/g, '|+|')
+            .replace(/\bor\b/gi, '|or|')
+            .replace(/\bthen\b/gi, '|then|')
+            .replace(/\(/g, '|(|')
+            .replace(/\)/g, '|)|')
+            .replace(/\bdrag\b/gi, '|drag|')
+            .replace(/\bhold\b/gi, '|hold|');
+        
+        // Split by the pipe character we added
+        const parts = keyString.split('|').filter(part => part.trim() !== '');
+        
+        // Process each part
+        let html = '';
+        
+        parts.forEach(part => {
+            part = part.trim();
+            if (!part) return;
+            
+            if (part === '+') {
+                html += '<span class="operator">+</span>';
+            } else if (part.toLowerCase() === 'or') {
+                html += '<span class="operator">or</span>';
+            } else if (part.toLowerCase() === 'then') {
+                html += '<span class="operator">→</span>';
+            } else if (part === '(' || part === ')') {
+                html += `<span class="operator">${part}</span>`;
+            } else if (part.toLowerCase() === 'drag' || part.toLowerCase() === 'hold') {
+                html += `<span class="text-operator">${part.toLowerCase()}</span>`;
+            } else if (part.toLowerCase() === 'mmb') {
+                html += '<span class="key mouse mmb">Mid</span>';
+            } else if (part.toLowerCase() === 'lmb') {
+                html += '<span class="key mouse lmb">Left</span>';
+            } else if (part.toLowerCase() === 'rmb') {
+                html += '<span class="key mouse rmb">Right</span>';
+            } else {
+                // Determine key size based on length - more compact size classes
+                let sizeClass = 'medium';
+                if (part.length <= 1) {
+                    sizeClass = 'small';
+                } else if (part.length >= 4 && part.length < 6) {
+                    sizeClass = 'medium';
+                } else if (part.length >= 6) {
+                    sizeClass = 'large';
+                }
+                if (part.toLowerCase() === 'space') {
+                    sizeClass = 'space';
+                }
+                
+                // Check for specific modifier keys
+                const modifierKeys = ['ctrl', 'alt', 'shift', 'tab', 'delete', 'home', 'space'];
+                const isModifier = modifierKeys.some(modifier => part.toLowerCase() === modifier);
+                
+                // Special formatting for numpad keys
+                const isNumpad = part.toLowerCase().includes('numpad');
+                const keyClass = isModifier ? 'modifier' : (isNumpad ? 'numpad' : '');
+                
+                // Format key display to ensure proper capitalization
+                let displayKey = part;
+                if (modifierKeys.includes(part.toLowerCase())) {
+                    // Capitalize first letter of modifier keys
+                    displayKey = part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+                }
+                
+                html += `<span class="key ${sizeClass} ${keyClass}">${displayKey}</span>`;
+            }
+        });
+        
+        return html;
+    }
+
+    // Display keys in a larger format
+    function displayKeys(action, keys) {
+        activeKey = { action, keys };
+        
+        const keyDisplay = document.getElementById('key-detail');
+        keyDisplay.innerHTML = `
+            <h3>${action}</h3>
+            <div class="key-combo">${formatKeys(keys)}</div>
+            <div class="key-instructions">
+                Click on the shortcut card to see details. Press ESC to close.
+            </div>
+        `;
+        
+        keysDisplay.style.display = 'flex';
+    }
+
+    // Close the keys display
+    document.getElementById('close-keys').addEventListener('click', () => {
+        keysDisplay.style.display = 'none';
+        activeKey = null;
+    });
+
+    // Function to filter shortcuts based on search and category states
+    function filterShortcuts() {
+        renderShortcuts();
+    }
+
+    // Toggle between light and dark themes
+    function toggleTheme() {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.body.className = currentTheme;
+        localStorage.setItem('theme', currentTheme);
+        updateThemeIcon();
+    }
+
+    // Update the theme toggle icon
+    function updateThemeIcon() {
+        themeToggle.innerHTML = currentTheme === 'dark' 
+            ? '<span class="material-icons">light_mode</span>' 
+            : '<span class="material-icons">dark_mode</span>';
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', filterShortcuts);
+    themeToggle.addEventListener('click', toggleTheme);
+
+    // Initialize the page
+    initializeCategoryPills();
+    renderShortcuts();
+    
+    // Add a keyboard shortcut for search (Ctrl+F or Cmd+F)
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            searchInput.focus();
+        }
+        
+        // Escape key to close key display
+        if (e.key === 'Escape' && keysDisplay.style.display === 'flex') {
+            keysDisplay.style.display = 'none';
+            activeKey = null;
+        }
+    });
+
     // Function to render shortcuts based on current filters
     function renderShortcuts() {
         const query = searchInput.value.toLowerCase();
@@ -548,7 +689,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const shortcutDiv = document.createElement('div');
                 shortcutDiv.className = 'shortcut';
                 
-                // Format the keys for better display
+                // Format the keys with our new visual keyboard keys
                 const formattedKeys = formatKeys(sc.keys);
                 
                 shortcutDiv.innerHTML = `
@@ -575,82 +716,4 @@ document.addEventListener('DOMContentLoaded', () => {
             keysDisplay.style.display = 'none';
         }
     }
-
-    // Function to format keys for better display
-    function formatKeys(keys) {
-        return keys.replace(/\+/g, ' <span class="plus">+</span> ')
-                  .replace(/or/g, ' <span class="or">or</span> ')
-                  .replace(/then/g, ' <span class="then">then</span> ')
-                  .replace(/\(/g, '<span class="paren">(</span>')
-                  .replace(/\)/g, '<span class="paren">)</span>')
-                  .replace(/MMB/g, '<span class="mouse" title="Middle Mouse Button">Middle 🖱️</span>')
-                  .replace(/LMB/g, '<span class="mouse" title="Left Mouse Button">Left 🖱️</span>')
-                  .replace(/RMB/g, '<span class="mouse" title="Right Mouse Button">Right 🖱️</span>')
-                  .replace(/Ctrl/g, '<span class="modifier">Ctrl</span>')
-                  .replace(/Alt/g, '<span class="modifier">Alt</span>')
-                  .replace(/Shift/g, '<span class="modifier">Shift</span>')
-                  .replace(/drag/g, '<span class="action-desc">drag</span>')
-                  .replace(/hold/g, '<span class="action-desc">hold</span>');
-    }
-
-    // Display keys in a larger format
-    function displayKeys(action, keys) {
-        activeKey = { action, keys };
-        
-        const keyDisplay = document.getElementById('key-detail');
-        keyDisplay.innerHTML = `
-            <h3>${action}</h3>
-            <div class="key-combo">${formatKeys(keys)}</div>
-        `;
-        
-        keysDisplay.style.display = 'flex';
-    }
-
-    // Close the keys display
-    document.getElementById('close-keys').addEventListener('click', () => {
-        keysDisplay.style.display = 'none';
-        activeKey = null;
-    });
-
-    // Function to filter shortcuts based on search and category states
-    function filterShortcuts() {
-        renderShortcuts();
-    }
-
-    // Toggle between light and dark themes
-    function toggleTheme() {
-        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.body.className = currentTheme;
-        localStorage.setItem('theme', currentTheme);
-        updateThemeIcon();
-    }
-
-    // Update the theme toggle icon
-    function updateThemeIcon() {
-        themeToggle.innerHTML = currentTheme === 'dark' 
-            ? '<span class="material-icons">light_mode</span>' 
-            : '<span class="material-icons">dark_mode</span>';
-    }
-
-    // Event listeners
-    searchInput.addEventListener('input', filterShortcuts);
-    themeToggle.addEventListener('click', toggleTheme);
-
-    // Initialize the page
-    initializeCategoryPills();
-    renderShortcuts();
-    
-    // Add a keyboard shortcut for search (Ctrl+F or Cmd+F)
-    document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-            e.preventDefault();
-            searchInput.focus();
-        }
-        
-        // Escape key to close key display
-        if (e.key === 'Escape' && keysDisplay.style.display === 'flex') {
-            keysDisplay.style.display = 'none';
-            activeKey = null;
-        }
-    });
 }); 
