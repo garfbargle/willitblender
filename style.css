@@ -630,6 +630,12 @@ footer a:hover {
     margin-top: 0.4rem;
 }
 
+.citation {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
 kbd {
     font-family: 'SF Mono', 'Consolas', 'Liberation Mono', Menlo, monospace;
     padding: 0.1rem 0.2rem;
