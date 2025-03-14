@@ -537,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (part.toLowerCase() === 'rmb') {
                 html += '<span class="key mouse rmb">Right</span>';
             } else {
-                // Determine key size based on length - more compact size classes
+                // Determine key size based on length - make even more compact
                 let sizeClass = 'medium';
                 if (part.length <= 1) {
                     sizeClass = 'small';
@@ -546,6 +546,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (part.length >= 6) {
                     sizeClass = 'large';
                 }
+                
+                // Space key special case
                 if (part.toLowerCase() === 'space') {
                     sizeClass = 'space';
                 }
@@ -676,7 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
             )
         })).filter(cat => cat.shortcuts.length > 0);
 
-        // Render the filtered shortcuts
+        // Render the filtered shortcuts - with more compact layout
         filteredData.forEach(cat => {
             const categoryDiv = document.createElement('div');
             categoryDiv.className = 'category';
@@ -689,7 +691,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const shortcutDiv = document.createElement('div');
                 shortcutDiv.className = 'shortcut';
                 
-                // Format the keys with our new visual keyboard keys
+                // Format the keys with our visual keyboard keys
                 const formattedKeys = formatKeys(sc.keys);
                 
                 shortcutDiv.innerHTML = `
